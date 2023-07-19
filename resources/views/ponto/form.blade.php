@@ -1,3 +1,4 @@
+
 <div class="card2 card border-0 px-4 py-5">
     @if (isset($ponto))
         <form method="POST" action="{{ route('ponto.update', $ponto->id) }}" enctype="multipart/form-data">
@@ -9,7 +10,7 @@
         <div class="row">
             <div class="col">
                 <label for="data" class="mb-1"><h6 class="mb-0 text-sm">{{ __('Data') }}</h6></label>
-                <input class="mb-4" type="date" name="data" value="{{isset($ponto) ? $ponto->data : old('data')}}">
+                <input class="mb-4" type="date" name="data" value="{{isset($ponto) ? $ponto->data : date('d/m/Y', strtotime(now()))}}">
                 @error('data')
                     <span class="invalid-feedback" role="alert">
                         <strong>{{ $message }}</strong>

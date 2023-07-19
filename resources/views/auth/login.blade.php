@@ -35,7 +35,7 @@
             
                                     <div class="row mb-4 px-3">
                                         <label for="password" class="mb-1"><h6 class="mb-0 text-sm">{{ __('Senha') }}</h6></label>
-                                        <input id="password" type="password @error('password') is-invalid @enderror" name="password" required autocomplete="current-password">
+                                        <input id="password" type="password" name="password" required autocomplete="current-password">
                         
                                         @error('password')
                                             <span class="invalid-feedback" role="alert">

@@ -5,7 +5,7 @@
     <div class="row justify-content-end">
         <div class="col-md-10">
             <div class="card">
-                <div  class="card-header"><h4><i class="fa-solid fa-eye"></i> Visualizar <b> {{ date('d / m / Y', strtotime($ponto->created_at)) }}</b> </h4></div>
+                <div  class="card-header"><h4><i class="fa-solid fa-eye"></i> Visualizar <b> {{ ($ponto->data) ? date('d/m/Y', strtotime($ponto->data)) : date('d/m/Y', strtotime($ponto->created_at)) }}</b> </h4></div>
                 
                 <div class="card-body">
                     <div>
@@ -18,6 +18,7 @@
                                             <th>Entrada Almoço</th>
                                             <th>Saída Almoço</th>
                                             <th>Saída</th>
+                                            <th> {{$ponto->horas_extras != '' ? 'Hora Extra' : 'Hora Negaiva' }}</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -26,6 +27,7 @@
                                             <td> {{ date('H:i:s', strtotime($ponto->entrada_almoco))}} </td>
                                             <td> {{ date('H:i:s', strtotime($ponto->saida_almoco))}} </td>
                                             <td> {{date('H:i:s', strtotime($ponto->saida))}} </td>
+                                            <td> {{ $ponto->horas_extras != '' ? date('H:i:s', strtotime($ponto->horas_extras)) : date('H:i:s', strtotime($ponto->horas_negativas))}} </td>
                                         </tr>
                                         <tr>
                                             <td>

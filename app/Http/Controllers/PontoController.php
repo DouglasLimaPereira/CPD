@@ -28,10 +28,9 @@ class PontoController extends Controller
      */
     public function index()
     {
-        $user = auth()->user(); 
-        // $pontos = auth()->user()->pontos;
-        $pontos = $user->pontos()->orderBy('created_at', 'asc')->paginate(10);
-        
+        $user = auth()->user();
+        $pontos = $user->pontos()->orderBy('data', 'asc')->paginate(10);
+
         return view('ponto.index', compact('pontos'));
     }
 
@@ -176,11 +175,16 @@ class PontoController extends Controller
                 // --------------------------------------------------------------------------
                 if ( $horas[0] == '-') {
                     $ponto->update([
-                            'horas_negativas' => $horas[1]
+                        'horas_negativas' => $horas[1]
+                    ]);
+                }elseif ( $horas[0] == '+'){
+                    $ponto->update([
+                        'horas_extras' => $horas[1]
                     ]);
                 }else{
                     $ponto->update([
-                        'horas_extras' => $horas[1]
+                        'horas_extras' => '00:00:00',
+                        'horas_negativas' => '00:00:00',
                     ]);
                 }
             }
@@ -200,5 +204,56 @@ class PontoController extends Controller
     public function destroy(string $id)
     {
         //
+    }
+
+    public function HoraExtra(){
+        #---------------------------------------
+        # Criando a data inícial a ser comparada
+        #---------------------------------------
+        $data_inicio = carbon::now()->sub('1 month')->day(21)->toDateString();
+        
+        #------------------------------------
+        # Criando a data final a ser comparda
+        #------------------------------------
+        $data_fim = carbon::now()->toDateString();
+
+        #---------------------------
+        # Recebendo o usuario logado
+        #---------------------------
+        $user = auth()->user(); 
+
+        #--------------------------------------------------------------------------------
+        # Recebendo os registros do ponto onde se enquadra entre as datas de inicio e fim
+        #--------------------------------------------------------------------------------
+        $pontos = $user->pontos()->whereBetween('data', [$data_inicio, $data_fim])->orderBy('data', 'asc')->get();
+        
+        $hora_extra = carbon::create('00','00','00');
+        $hora_negativas = carbon::create('00','00','00');
+
+        foreach ($pontos as $key => $ponto) {
+            if ($ponto->horas_extras != '00:00:00') {
+                $horas = explode(':', $ponto->horas_extras);
+                $hora_extra->add($horas[0], 'hours');
+                $hora_extra->add($horas[1], 'minutes');
+                $hora_extra->add($horas[2], 'seconds');
+            } elseif ($ponto->horas_negativas != '00:00:00') {
+                $horas = explode(':', $ponto->horas_negativas);
+                $hora_negativas->add($horas[0], 'hours');
+                $hora_negativas->add($horas[1], 'minutes');
+                $hora_negativas->add($horas[2], 'seconds');
+            }
+        }
+
+        #-------------------------------------------
+        # Subtraindo horas negativas das horas extra
+        #-------------------------------------------
+        $hora_n = explode(':', $hora_negativas->toTimeString());        
+        $hora_extra->subHour($hora_n[0], 'hours');
+        $hora_extra->subMinutes($hora_n[1], 'minutes');
+        $hora_extra->subSeconds($hora_n[2], 'seconds');
+
+        $hora_extra = $hora_extra->toTimeString();
+
+        return view('ponto.hora-extra', compact('pontos', 'hora_extra'));
     }
 }

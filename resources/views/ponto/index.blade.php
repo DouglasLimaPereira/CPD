@@ -23,8 +23,8 @@
                                 </thead>
                                 <tbody>
                                     @foreach ($pontos as $ponto)
-                                        <tr>
-                                            <td>{{ date('d/m/Y', strtotime($ponto->created_at)) }}</td>
+                                        <tr> 
+                                            <td>{{ ($ponto->data) ? date('d/m/Y', strtotime($ponto->data)) : date('d/m/Y', strtotime($ponto->created_at)) }}</td>
                                             <td>{{ $ponto->entrada }}</td>
                                             <td>{{ $ponto->entrada_almoco }}</td>
                                             <td>{{ $ponto->saida_almoco }}</td>

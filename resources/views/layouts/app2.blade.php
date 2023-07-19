@@ -295,7 +295,7 @@
     <div class="flex-shrink-0 p-3 bg-white" style="width: 280px; position: absolute; height: 100%;">
         <ul class="list-unstyled ps-0 pt-3">
           <li class="mb-1">
-            <a class="pl-3  collapsed" data-bs-toggle="collapse" data-bs-target="#home-collapse" aria-expanded="false">
+            <a class="pb-3 pl-3  collapsed" data-bs-toggle="collapse" data-bs-target="#home-collapse" aria-expanded="false">
                 <i class="fa-solid fa-clock"></i> <b>Ponto</b>
             </a>
             <div class="collapse" id="home-collapse">
@@ -310,11 +310,18 @@
                 </li>
                 <hr>
                 <li class="mb-2">
+                    <a href="{{route('ponto.hora-extra')}}" class="" style="text-decoration: none"><i class="fa-solid fa-stopwatch"></i> <b>Consultar Horas</b></a>
+                </li>
+                <hr>
+                <li class="mb-2">
                     <a href="#" class="" style="text-decoration: none"><i class="fa-solid fa-file-pdf"></i> <b>Relatório</b></a>
                 </li>
                 <hr>
               </ul>
             </div>
+          </li>
+          <li class="mb-2">
+            <a href="{{route('escala.index')}}" class="pl-3 list-unstyled" style="text-decoration: none"><i class="fa-solid fa-calendar"></i> <b>Escala</b></a>
           </li>
         </ul>
     </div>
