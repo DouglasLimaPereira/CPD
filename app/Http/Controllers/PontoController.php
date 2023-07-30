@@ -10,6 +10,7 @@ use App\Recursos\HoraExtra;
 use Carbon\Carbon;
 use DateTime\DateTime;
 use Exception;
+use Pdf;
 
 class PontoController extends Controller
 {
@@ -96,13 +97,25 @@ class PontoController extends Controller
                 // --------------------------------------------------------------------------
                 if ( $horas[0] == '-') {
                     $ponto->update([
-                            'horas_negativas' => $horas[1]
+                        'horas_extras' => '00:00:00',
+                        'horas_negativas' => $horas[1]
+                    ]);
+                }elseif ( $horas[0] == '+'){
+                    $ponto->update([
+                        'horas_extras' => $horas[1],
+                        'horas_negativas' => '00:00:00',
                     ]);
                 }else{
                     $ponto->update([
-                        'horas_extras' => $horas[1]
+                        'horas_extras' => '00:00:00',
+                        'horas_negativas' => '00:00:00',
                     ]);
                 }
+            }else{
+                $ponto->update([
+                    'horas_extras' => '00:00:00',
+                    'horas_negativas' => '00:00:00',
+                ]);
             }
             
             DB::commit();
@@ -160,7 +173,7 @@ class PontoController extends Controller
                     'comprovante3' => $comprovante3
                 ]);
             }
-            
+                        
             if(isset($request->comprovante4) && $request->comprovante4->isValid()){
                 $comprovante4 = $this->anexo->Store($ponto->id, auth()->user()->id, $request->comprovante4, $ponto->comprovante4);
                 $ponto->update([
@@ -170,9 +183,9 @@ class PontoController extends Controller
 
             if (isset($request->saida) && $request->saida != '') {
                 $horas = $this->hora_extra->calcularHoraExtra($request);
-                // --------------------------------------------------------------------------
-                // Verificando se a hora é negativa ou positiva e atalizando o banco de dados
-                // --------------------------------------------------------------------------
+                # -----------------------------------------------------------------------------
+                #| Verificando se a hora é negativa ou positiva e atalizando o banco de dados |
+                # -----------------------------------------------------------------------------
                 if ( $horas[0] == '-') {
                     $ponto->update([
                         'horas_negativas' => $horas[1]
@@ -201,59 +214,122 @@ class PontoController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Ponto $ponto)
     {
         //
     }
 
     public function HoraExtra(){
-        #---------------------------------------
-        # Criando a data inícial a ser comparada
-        #---------------------------------------
-        $data_inicio = carbon::now()->sub('1 month')->day(21)->toDateString();
-        
-        #------------------------------------
-        # Criando a data final a ser comparda
-        #------------------------------------
-        $data_fim = carbon::now()->toDateString();
 
-        #---------------------------
-        # Recebendo o usuario logado
-        #---------------------------
+        #-----------------------------------------------------------------------------------
+        #| Verificando se a data atual é maior que dia 21 e menor que dia 1 do próximo mês |
+        #-----------------------------------------------------------------------------------
+        if (carbon::now() >= carbon::now()->day(21) && carbon::now() < carbon::now()->add(1, 'month')->day(1)) {
+            #------------------------------------------
+            #| Criando a data inícial a ser comparada |
+            #------------------------------------------
+            $data_inicio = carbon::now()->day(21)->toDateString();
+            #----------------------------------------
+            #| Criando a data final a ser comparada |
+            #----------------------------------------
+            $data_fim = carbon::now()->toDateString();
+        
+        }else {
+            #----------------------------------------------------------------------------------------------------
+            #| Caso não caia na condição acima pega o dia 21 do mês anterior e dia atual do mês  a ser comparado|
+            #----------------------------------------------------------------------------------------------------
+
+            #------------------------------------------
+            #| Criando a data inícial a ser comparada |
+            #------------------------------------------
+            $data_inicio = carbon::now()->sub('1 month')->day(21)->toDateString();
+            
+            #---------------------------------------
+            #| Criando a data final a ser comparda |
+            #---------------------------------------
+            $data_fim = carbon::now()->toDateString();
+
+        }
+
+        #------------------------------
+        #| Recebendo o usuario logado |
+        #------------------------------
         $user = auth()->user(); 
 
-        #--------------------------------------------------------------------------------
-        # Recebendo os registros do ponto onde se enquadra entre as datas de inicio e fim
-        #--------------------------------------------------------------------------------
-        $pontos = $user->pontos()->whereBetween('data', [$data_inicio, $data_fim])->orderBy('data', 'asc')->get();
+        #-----------------------------------------------------------------------------------
+        #| Recebendo os registros do ponto onde se enquadra entre as datas de inicio e fim |
+        #-----------------------------------------------------------------------------------
+        $pontos = $user->pontos()->whereBetween('data', [$data_inicio, $data_fim])->orderBy('data', 'asc')->where('dsr', 0)->get();
         
+        #---------------------------------
+        #| Iniciando a hora extra zerada |
+        #---------------------------------
         $hora_extra = carbon::create('00','00','00');
+
+        #------------------------------------
+        #| Iniciando a hora negativa zerada |
+        #------------------------------------
         $hora_negativas = carbon::create('00','00','00');
 
         foreach ($pontos as $key => $ponto) {
             if ($ponto->horas_extras != '00:00:00') {
                 $horas = explode(':', $ponto->horas_extras);
-                $hora_extra->add($horas[0], 'hours');
-                $hora_extra->add($horas[1], 'minutes');
-                $hora_extra->add($horas[2], 'seconds');
+                $hora_extra->addHours($horas[0]);
+                $hora_extra->addMinutes($horas[1]);
+                $hora_extra->addSeconds($horas[2]);
+                
             } elseif ($ponto->horas_negativas != '00:00:00') {
                 $horas = explode(':', $ponto->horas_negativas);
-                $hora_negativas->add($horas[0], 'hours');
-                $hora_negativas->add($horas[1], 'minutes');
-                $hora_negativas->add($horas[2], 'seconds');
+                $hora_negativas->addHours($horas[0]);
+                $hora_negativas->addMinutes($horas[1]);
+                $hora_negativas->addSeconds($horas[2]);
+
             }
         }
-
-        #-------------------------------------------
-        # Subtraindo horas negativas das horas extra
-        #-------------------------------------------
-        $hora_n = explode(':', $hora_negativas->toTimeString());        
-        $hora_extra->subHour($hora_n[0], 'hours');
-        $hora_extra->subMinutes($hora_n[1], 'minutes');
-        $hora_extra->subSeconds($hora_n[2], 'seconds');
-
+        
+        #---------------------------------------------
+        #| Calculando horas negativas e horas extras |
+        #---------------------------------------------
+        if ($hora_extra->toTimeString() != '00:00:00') {
+            if ($hora_extra > $hora_negativas) {
+                $hora_n = explode(':', $hora_negativas->toTimeString());  
+                if ($hora_n[0] != '00')
+                    $hora_extra->subHours($hora_n[0]);
+                if ($hora_n[1] != '00')
+                    $hora_extra->subMinutes($hora_n[1]);
+                if ($hora_n[2] != '00')
+                    $hora_extra->subSeconds($hora_n[2]);
+            }else{
+                $hora_x = explode(':', $hora_extra->toTimeString());  
+                if ($hora_x[0] != '00')
+                    $hora_negativas->subHours($hora_x[0]);
+                    $hora_extra->subHours($hora_x[0]);
+                if ($hora_x[1] != '00')
+                    $hora_negativas->subMinutes($hora_x[1]);
+                    $hora_extra->subMinutes($hora_x[1]);
+                if ($hora_x[2] != '00')
+                    $hora_negativas->subSeconds($hora_x[2]);
+                    $hora_extra->subSeconds($hora_x[2]);
+            }
+        }
+    
+        #------------------------------------
+        #| Convertendo horários para String |
+        #------------------------------------
         $hora_extra = $hora_extra->toTimeString();
+        $hora_negativas = $hora_negativas->toTimeString();
 
-        return view('ponto.hora-extra', compact('pontos', 'hora_extra'));
+        return view('ponto.hora-extra', compact('pontos', 'hora_extra', 'hora_negativas'));
+    }
+
+    public function relatorio() {
+        $user = auth()->user();
+        $pontos = Ponto::where('user_id', $user->id)->get();
+        
+        // return Pdf::loadFile(public_path().'/myfile.html')->save('/path-to/my_stored_file.pdf')->stream('download.pdf');
+        return Pdf::loadView('ponto._partials.pdf.pontos-pdf', compact('pontos'))
+        // Se quiser que fique no formato a4 retrato: ->setPaper('a4', 'landscape')
+        // ->download
+        ->stream('pontos'.date('m').'-'.$user->name.'.pdf');
     }
 }

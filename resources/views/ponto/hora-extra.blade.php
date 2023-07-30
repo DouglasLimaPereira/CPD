@@ -5,7 +5,23 @@
     <div class="row justify-content-end">
         <div class="col-md-10">
             <div class="card">
-                <div  class="card-header"><h4><i class="fa-solid fa-stopwatch fa-lg mt-2"></i>  <b style="float: right"> <h2><span class="badge badge-info">Horas extras {{$hora_extra}}</span></h2></b> </h4></div>
+                <div class="card-header">
+                    <div class="row">
+                        <h4>
+                            <i class="fa-solid fa-stopwatch fa-lg mt-2"></i>
+                            <b style="float: right">
+                                <h2>
+                                    <span class="badge badge-danger">Horas negativas {{$hora_negativas}}</span>
+                                </h2>
+                            </b>
+                            <b style="float: right" class="mr-3">
+                                <h2>
+                                    <span class="badge badge-success">Horas positivas {{$hora_extra}}</span>
+                                </h2>
+                            </b>
+                        </h4>
+                    </div>
+                </div>
                 
                 <div class="card-body">
                     <div>

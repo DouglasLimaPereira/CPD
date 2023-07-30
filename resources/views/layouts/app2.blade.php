@@ -314,7 +314,7 @@
                 </li>
                 <hr>
                 <li class="mb-2">
-                    <a href="#" class="" style="text-decoration: none"><i class="fa-solid fa-file-pdf"></i> <b>Relatório</b></a>
+                    <a href="{{route('ponto.relatorio')}}" target="_blank" class="" style="text-decoration: none"><i class="fa-solid fa-file-pdf"></i> <b>Relatório</b></a>
                 </li>
                 <hr>
               </ul>

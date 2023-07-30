@@ -20,7 +20,7 @@
             <div class="col">
                 <label for="entrada" class="mb-1"><h6 class="mb-0 text-sm">{{ __('Entrada') }}</h6></label>
                 <input class="mb-4" type="time" name="entrada" value="{{isset($ponto) ? $ponto->entrada : old('entrada')}}">
-                @error('email')
+                @error('entrada')
                     <span class="invalid-feedback" role="alert">
                         <strong>{{ $message }}</strong>
                     </span>
@@ -31,7 +31,7 @@
                 <label for="entrada_almoco" class="mb-1"><h6 class="mb-0 text-sm">{{ __('Entrada Almoço') }}</h6></label>
                 <input id="entrada_almoco" type="time" name="entrada_almoco" value="{{isset($ponto) ? $ponto->entrada_almoco : old('entrada_almoco')}}">
 
-                @error('password')
+                @error('entrada_almoco')
                     <span class="invalid-feedback" role="alert">
                         <strong>{{ $message }}</strong>
                     </span>
@@ -42,7 +42,7 @@
                 <label for="saida_almoco" class="mb-1"><h6 class="mb-0 text-sm">{{ __('Saída Almoço') }}</h6></label>
                 <input id="saida_almoco" type="time" name="saida_almoco" value="{{isset($ponto) ? $ponto->saida_almoco : old('saida_almoco')}}">
 
-                @error('password')
+                @error('saida_almoco')
                     <span class="invalid-feedback" role="alert">
                         <strong>{{ $message }}</strong>
                     </span>
@@ -53,7 +53,7 @@
                 <label for="saida" class="mb-1"><h6 class="mb-0 text-sm">{{ __('Saída') }}</h6></label>
                 <input id="saida" type="time" name="saida" value="{{isset($ponto) ? $ponto->saida : old('saida')}}">
 
-                @error('password')
+                @error('saida')
                     <span class="invalid-feedback" role="alert">
                         <strong>{{ $message }}</strong>
                     </span>
@@ -62,7 +62,18 @@
         </div>
         <div class="row">
             <div class="col">
-                
+                <label for="dsr" class="mb-1"><h6 class="mb-0 text-sm">{{ __('DSR ?') }}</h6></label>
+                <select class="form-control" name="dsr" id="dsr" required>
+                    <option disabled selected>Selecione...</option>
+                    <option value="1" {{ (isset($ponto) && $ponto->dsr == 1) ? 'selected' : '' }} >SIM</option>
+                    <option value="0" {{ (isset($ponto) && $ponto->dsr == 0) ? 'selected' : '' }} >NÃO</option>
+                </select>
+
+                @error('dsr')
+                    <span class="invalid-feedback" role="alert">
+                        <strong>{{ $message }}</strong>
+                    </span>
+                @enderror
             </div>
             <div class="col">
                 <label for="comprovante1" class="mb-1"><h6 class="mb-0 text-sm">{{ __('Comprovante N° 1') }}</h6></label>

@@ -31,6 +31,7 @@ Route::group(['prefix'=>'ponto', 'as'=>'ponto.', 'middleware'=>['auth']], functi
     Route::get('{ponto}/show', [App\Http\Controllers\PontoController::class, 'show'])->name('show');
     Route::get('{ponto}/destroy', [App\Http\Controllers\PontoController::class, 'destroy'])->name('destroy');
     Route::get('hora-extra', [App\Http\Controllers\PontoController::class, 'HoraExtra'])->name('hora-extra');
+    Route::get('relatorio', [App\Http\Controllers\PontoController::class, 'relatorio'])->name('relatorio');
 });
 
 Route::get('escala', [App\Http\Controllers\EscalaController::class, 'index'])->name('escala.index');
